@@ -114,7 +114,7 @@ public abstract class GLFrameBuffer<T extends GLTexture> implements Disposable {
 
 	/** Override this method in a derived class to set up the backing texture as you like. */
 	protected abstract T createColorTexture ();
-	
+
 	/** Override this method in a derived class to dispose the backing texture as you like. */
 	protected abstract void disposeColorTexture (T colorTexture);
 
@@ -203,7 +203,7 @@ public abstract class GLFrameBuffer<T extends GLTexture> implements Disposable {
 		GL20 gl = Gdx.gl20;
 
 		disposeColorTexture(colorTexture);
-		
+
 		if (hasDepth) gl.glDeleteRenderbuffer(depthbufferHandle);
 
 		if (hasStencil) gl.glDeleteRenderbuffer(stencilbufferHandle);
