@@ -20,22 +20,23 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.environment.SpotLight;
 import com.badlogic.gdx.graphics.g3d.postprocessing.PostProcessingSystem;
-import com.badlogic.gdx.graphics.g3d.postprocessing.effects.NoEffect;
+import com.badlogic.gdx.graphics.g3d.postprocessing.components.blur.BlurComponent;
+import com.badlogic.gdx.graphics.g3d.postprocessing.components.depth.DepthComponent;
+import com.badlogic.gdx.graphics.g3d.postprocessing.effects.PostProcessingEffect;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.tests.utils.GdxTest;
 import com.badlogic.gdx.utils.Array;
@@ -47,6 +48,7 @@ public class PostProcessingTest extends GdxTest {
 	Model model;
 	ModelInstance instance;
 	Environment environment;
+	Array<ModelInstance> instances = new Array<ModelInstance>();
 
 	public Model axesModel;
 	public ModelInstance axesInstance;
@@ -60,6 +62,9 @@ public class PostProcessingTest extends GdxTest {
 	DirectionalLight dl;
 	float radius = 1f;
 	Vector3 center = new Vector3(), transformedCenter = new Vector3(), tmpV = new Vector3();
+
+	BlurComponent blur;
+	FrameBuffer fb;
 
 	@Override
 	public void create () {
@@ -91,40 +96,19 @@ public class PostProcessingTest extends GdxTest {
 		cam.up.set(0, 1, 0);
 		cam.update();
 
-		// Load texture
-		Array<Texture> wood = new Array<Texture>(3);
-		wood.add(new Texture(Gdx.files.internal("data/g3d/materials/wood/diffuse.png")));
-		wood.add(new Texture(Gdx.files.internal("data/g3d/materials/wood/normal.png")));
-		wood.add(new Texture(Gdx.files.internal("data/g3d/materials/wood/specular.png")));
-
-		Array<Texture> earth = new Array<Texture>(3);
-		earth.add(new Texture(Gdx.files.internal("data/g3d/materials/earth/diffuse.png")));
-		earth.add(new Texture(Gdx.files.internal("data/g3d/materials/earth/normal.png")));
-		earth.add(new Texture(Gdx.files.internal("data/g3d/materials/earth/specular.png")));
-		earth.get(0).setFilter(TextureFilter.Linear, TextureFilter.Linear);
-		earth.get(1).setFilter(TextureFilter.Linear, TextureFilter.Linear);
-		earth.get(2).setFilter(TextureFilter.Linear, TextureFilter.Linear);
-
 		ModelBuilder modelBuilder = new ModelBuilder();
 		modelBuilder.begin();
-		MeshPartBuilder mpb = modelBuilder.part(
-			"ground",
-			GL20.GL_TRIANGLES,
-			Usage.Position | Usage.Normal | Usage.TextureCoordinates,
-			new Material(TextureAttribute.createDiffuse(wood.get(0)), TextureAttribute.createNormal(wood.get(1)), TextureAttribute
-				.createSpecular(wood.get(2))));
+		MeshPartBuilder mpb = modelBuilder.part("ground", GL20.GL_TRIANGLES, Usage.Position | Usage.Normal | Usage.ColorUnpacked,
+			new Material(ColorAttribute.createDiffuse(Color.RED)));
 		mpb.box(0, -1.5f, 0, 10, 1, 10);
 
-		mpb = modelBuilder.part(
-			"ball",
-			GL20.GL_TRIANGLES,
-			Usage.Position | Usage.Normal | Usage.TextureCoordinates,
-			new Material(TextureAttribute.createDiffuse(earth.get(0)), TextureAttribute.createNormal(earth.get(1)), TextureAttribute
-				.createSpecular(earth.get(2))));
+		mpb = modelBuilder.part("ball", GL20.GL_TRIANGLES, Usage.Position | Usage.Normal | Usage.ColorUnpacked, new Material(
+			ColorAttribute.createDiffuse(Color.BLUE)));
 		mpb.sphere(2f, 2f, 2f, 20, 20);
 
 		model = modelBuilder.end();
 		instance = new ModelInstance(model);
+		instances.add(instance);
 
 		Array<ModelInstance> instances = new Array<ModelInstance>();
 		instances.add(instance);
@@ -133,7 +117,9 @@ public class PostProcessingTest extends GdxTest {
 		Gdx.input.setInputProcessor(inputController = new CameraInputController(cam));
 
 		ppSystem = new PostProcessingSystem();
-		ppSystem.addEffect(new NoEffect());
+		PostProcessingEffect effect = new PostProcessingEffect().addComponent(new DepthComponent()).addComponent(
+			new BlurComponent());
+		ppSystem.addEffect(effect);
 	}
 
 	private void createAxes () {
@@ -180,21 +166,17 @@ public class PostProcessingTest extends GdxTest {
 
 		dl.direction.rotate(Vector3.X, delta * 10f);
 
+		ppSystem.begin();
 		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-
-		ppSystem.begin(modelBatch);
-		ModelBatch modelBatchTmp;
-		while ((modelBatchTmp = ppSystem.next()) != null) {
-			modelBatchTmp.begin(cam);
-			modelBatchTmp.render(axesInstance);
-			modelBatchTmp.render(instance, environment);
-			modelBatchTmp.end();
-		}
+		modelBatch.begin(cam);
+		modelBatch.render(axesInstance);
+		modelBatch.render(instance, environment);
+		modelBatch.end();
 		ppSystem.end();
 
-		ppSystem.render();
+		ppSystem.render(cam, instances, environment);
 	}
 
 	@Override
