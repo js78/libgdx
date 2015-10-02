@@ -1,3 +1,5 @@
+#version 130
+
 uniform sampler2D u_texture;
 uniform sampler2D u_lensColor;
 uniform int u_samples;

@@ -5,6 +5,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.postprocessing.components.utils.QuadShader;
 import com.badlogic.gdx.math.Matrix3;
+import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Vector3;
 
 public class LensFlareComposerShader extends QuadShader {
 	/** Uniforms */
@@ -17,7 +19,14 @@ public class LensFlareComposerShader extends QuadShader {
 	protected Texture mainTexture;
 	protected Texture lensDirtTexture;
 	protected Texture lensStarTexture;
-	protected Matrix3 lensStarMatrix;
+
+	protected Vector3 camX = new Vector3();
+	protected Vector3 camZ = new Vector3();
+
+	protected Matrix3 scaleBias1 = new Matrix3(new float[] {2, 0, 0, 0, 2, 0, -1, -1, 1});
+	protected Matrix3 scaleBias2 = new Matrix3(new float[] {0.5f, 0, 0, 0, 0.5f, 0, 0.5f, 0.5f, 1});
+	protected Matrix3 rotation = new Matrix3();
+	protected Matrix3 tmpM = new Matrix3();
 
 	public LensFlareComposerShader () {
 		super();
@@ -31,7 +40,6 @@ public class LensFlareComposerShader extends QuadShader {
 			Gdx.files.classpath("com/badlogic/gdx/graphics/g3d/postprocessing/components/lensflare_composer/lensdirt.png"));
 		this.lensStarTexture = new Texture(
 			Gdx.files.classpath("com/badlogic/gdx/graphics/g3d/postprocessing/components/lensflare_composer/lensstar.png"));
-		this.lensStarMatrix = new Matrix3();
 	}
 
 	@Override
@@ -41,9 +49,29 @@ public class LensFlareComposerShader extends QuadShader {
 
 	@Override
 	protected void setUniforms () {
+		// Compute Matrix3
+		float[] v = this.component.getSystem().camera.view.val;
+		camX.set(v[Matrix4.M00], v[Matrix4.M10], v[Matrix4.M20]);
+		camZ.set(v[Matrix4.M01], v[Matrix4.M11], v[Matrix4.M21]);
+
+		float camRotation = camX.dot(0, 0, 1) + camZ.dot(0, 1, 0);
+		rotation.val[Matrix3.M00] = (float)Math.cos(camRotation);
+		rotation.val[Matrix3.M10] = (float)Math.sin(camRotation);
+		rotation.val[Matrix3.M20] = 0;
+
+		rotation.val[Matrix3.M01] = (float)-Math.sin(camRotation);
+		rotation.val[Matrix3.M11] = (float)Math.cos(camRotation);
+		rotation.val[Matrix3.M21] = 0;
+
+		rotation.val[Matrix3.M02] = 0;
+		rotation.val[Matrix3.M12] = 0;
+		rotation.val[Matrix3.M22] = 1;
+
+		Matrix3 resultMatrix = tmpM.set(scaleBias2).mul(rotation).mul(scaleBias1);
+
 		program.setUniformi(u_mainTexture, context.textureBinder.bind(component.getSystem().getMainTexture()));
 		program.setUniformi(u_lensDirtTexture, context.textureBinder.bind(lensDirtTexture));
 		program.setUniformi(u_lensStarTexture, context.textureBinder.bind(lensStarTexture));
-		program.setUniformMatrix(u_lensStarMatrix, lensStarMatrix);
+		program.setUniformMatrix(u_lensStarMatrix, resultMatrix);
 	}
 }

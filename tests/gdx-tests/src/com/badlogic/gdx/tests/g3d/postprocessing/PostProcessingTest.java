@@ -150,6 +150,8 @@ public class PostProcessingTest extends GdxTest {
 		ppSystem = new PostProcessingSystem();
 		PostProcessingEffect effect = new PostProcessingEffect().addComponent(new LensFlareComponent())
 			.addComponent(new BlurComponent()).addComponent(new LensFlareComposerComponent());
+
+		// PostProcessingEffect effect = new PostProcessingEffect().addComponent(new LensFlareComponent());
 		ppSystem.addEffect(effect);
 	}
 
