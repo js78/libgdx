@@ -42,6 +42,11 @@ public abstract class SceneComponent implements PostProcessingComponent {
 	}
 
 	@Override
+	public PostProcessingSystem getSystem () {
+		return system;
+	}
+
+	@Override
 	public boolean needsMainTexture () {
 		return false;
 	}

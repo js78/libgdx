@@ -18,6 +18,7 @@ public class QuadShader implements Disposable {
 	protected ShaderProgram program;
 	protected RenderContext context;
 	protected int u_texture;
+	protected QuadComponent component;
 
 	public QuadShader () {
 		mesh = new Mesh(true, 4, 0, new VertexAttribute(Usage.Position, 2, ShaderProgram.POSITION_ATTRIBUTE));
@@ -27,6 +28,10 @@ public class QuadShader implements Disposable {
 		context = new RenderContext(new DefaultTextureBinder(DefaultTextureBinder.ROUNDROBIN));
 
 		u_texture = program.fetchUniformLocation("u_texture", false);
+	}
+
+	public void init (QuadComponent component) {
+		this.component = component;
 	}
 
 	protected String getVertex () {

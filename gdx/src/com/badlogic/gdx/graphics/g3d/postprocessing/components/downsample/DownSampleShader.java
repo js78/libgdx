@@ -13,7 +13,7 @@ public class DownSampleShader extends QuadShader {
 	protected float bias;
 
 	public DownSampleShader () {
-		this(0.5f, 0);
+		this(1f, 0);
 	}
 
 	public DownSampleShader (float scale, float bias) {

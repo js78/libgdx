@@ -10,4 +10,6 @@ public interface PostProcessingComponent {
 	public void init (PostProcessingSystem system);
 
 	public boolean needsMainTexture ();
+
+	public PostProcessingSystem getSystem ();
 }

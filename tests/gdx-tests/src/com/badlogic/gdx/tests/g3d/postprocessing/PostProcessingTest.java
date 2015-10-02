@@ -18,8 +18,10 @@ package com.badlogic.gdx.tests.g3d.postprocessing;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Cubemap;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
+import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Material;
@@ -27,12 +29,13 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.CubemapAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.environment.SpotLight;
 import com.badlogic.gdx.graphics.g3d.postprocessing.PostProcessingSystem;
 import com.badlogic.gdx.graphics.g3d.postprocessing.components.blur.BlurComponent;
-import com.badlogic.gdx.graphics.g3d.postprocessing.components.depth.DepthComponent;
-import com.badlogic.gdx.graphics.g3d.postprocessing.components.downsample.DownSampleComponent;
+import com.badlogic.gdx.graphics.g3d.postprocessing.components.lensflare.LensFlareComponent;
+import com.badlogic.gdx.graphics.g3d.postprocessing.components.lensflare_composer.LensFlareComposerComponent;
 import com.badlogic.gdx.graphics.g3d.postprocessing.effects.PostProcessingEffect;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
@@ -67,10 +70,37 @@ public class PostProcessingTest extends GdxTest {
 	BlurComponent blur;
 	FrameBuffer fb;
 
+	protected ModelBatch cubeBatch;
+	protected Cubemap cubemap;
+	protected ModelInstance cubeInstance;
+	protected PerspectiveCamera camCube;
+
 	@Override
 	public void create () {
 		modelBatch = new ModelBatch();
 		environment = new Environment();
+
+		cubeBatch = new ModelBatch(Gdx.files.internal("data/shaders/cubemap-vert.glsl"),
+			Gdx.files.internal("data/shaders/cubemap-frag.glsl"));
+
+		cubemap = new Cubemap(Gdx.files.internal("data/g3d/environment/nissibeach_PX.jpg"),
+			Gdx.files.internal("data/g3d/environment/nissibeach_NX.jpg"),
+			Gdx.files.internal("data/g3d/environment/nissibeach_PY.jpg"),
+			Gdx.files.internal("data/g3d/environment/nissibeach_NY.jpg"),
+			Gdx.files.internal("data/g3d/environment/nissibeach_PZ.jpg"),
+			Gdx.files.internal("data/g3d/environment/nissibeach_NZ.jpg"));
+
+		ModelBuilder builder = new ModelBuilder();
+		Model cubeModel = builder.createBox(100f, 100f, 100f, new Material(new CubemapAttribute(CubemapAttribute.EnvironmentMap,
+			cubemap)), VertexAttributes.Usage.Position);
+		cubeInstance = new ModelInstance(cubeModel);
+
+		camCube = new PerspectiveCamera(67, Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.5f);
+		camCube.position.set(0f, 2f, 2f);
+		camCube.lookAt(0, 0, 0);
+		camCube.near = 1f;
+		camCube.far = 300f;
+		camCube.update();
 
 		sl = new SpotLight().setPosition(0, 10, -6).setColor(0.8f, 0.3f, 0.3f, 1).setDirection(0, -0.57346237f, 0.8192319f)
 			.setIntensity(20).setCutoffAngle(60).setExponent(60);
@@ -90,10 +120,10 @@ public class PostProcessingTest extends GdxTest {
 
 		// The user camera
 		cam = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		cam.position.set(0f, 7f, 10f);
-		cam.lookAt(0, 0, 0);
+		cam.position.set(0f, 0f, 0f);
+		cam.lookAt(1, 0, 0);
 		cam.near = 1f;
-		cam.far = 25f;
+		cam.far = 110f;
 		cam.up.set(0, 1, 0);
 		cam.update();
 
@@ -118,8 +148,8 @@ public class PostProcessingTest extends GdxTest {
 		Gdx.input.setInputProcessor(inputController = new CameraInputController(cam));
 
 		ppSystem = new PostProcessingSystem();
-		PostProcessingEffect effect = new PostProcessingEffect().addComponent(new DepthComponent())
-			.addComponent(new BlurComponent()).addComponent(new DownSampleComponent());
+		PostProcessingEffect effect = new PostProcessingEffect().addComponent(new LensFlareComponent())
+			.addComponent(new BlurComponent()).addComponent(new LensFlareComposerComponent());
 		ppSystem.addEffect(effect);
 	}
 
@@ -171,13 +201,17 @@ public class PostProcessingTest extends GdxTest {
 		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-		modelBatch.begin(cam);
-		modelBatch.render(axesInstance);
-		modelBatch.render(instance, environment);
-		modelBatch.end();
+		cubeBatch.begin(cam);
+		cubeBatch.render(cubeInstance);
+		cubeBatch.end();
+		// modelBatch.begin(cam);
+		// modelBatch.render(axesInstance);
+		// modelBatch.render(instance, environment);
+		// modelBatch.end();
 		ppSystem.end();
 
 		ppSystem.render(cam, instances, environment);
+
 	}
 
 	@Override

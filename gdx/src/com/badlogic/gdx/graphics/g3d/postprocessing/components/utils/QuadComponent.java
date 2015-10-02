@@ -17,6 +17,7 @@ public abstract class QuadComponent implements PostProcessingComponent {
 	public QuadComponent () {
 		frameBuffer = getFrameBuffer();
 		shader = getShader();
+		shader.init(this);
 	}
 
 	protected FrameBuffer getFrameBuffer () {
@@ -39,6 +40,11 @@ public abstract class QuadComponent implements PostProcessingComponent {
 	@Override
 	public void init (PostProcessingSystem system) {
 		this.system = system;
+	}
+
+	@Override
+	public PostProcessingSystem getSystem () {
+		return system;
 	}
 
 	@Override
