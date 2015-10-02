@@ -8,4 +8,6 @@ public interface PostProcessingComponent {
 	public Texture render (Texture input, boolean window);
 
 	public void init (PostProcessingSystem system);
+
+	public boolean needsMainTexture ();
 }

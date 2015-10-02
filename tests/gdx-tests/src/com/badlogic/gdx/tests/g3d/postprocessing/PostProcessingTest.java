@@ -32,6 +32,7 @@ import com.badlogic.gdx.graphics.g3d.environment.SpotLight;
 import com.badlogic.gdx.graphics.g3d.postprocessing.PostProcessingSystem;
 import com.badlogic.gdx.graphics.g3d.postprocessing.components.blur.BlurComponent;
 import com.badlogic.gdx.graphics.g3d.postprocessing.components.depth.DepthComponent;
+import com.badlogic.gdx.graphics.g3d.postprocessing.components.downsample.DownSampleComponent;
 import com.badlogic.gdx.graphics.g3d.postprocessing.effects.PostProcessingEffect;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
@@ -117,8 +118,8 @@ public class PostProcessingTest extends GdxTest {
 		Gdx.input.setInputProcessor(inputController = new CameraInputController(cam));
 
 		ppSystem = new PostProcessingSystem();
-		PostProcessingEffect effect = new PostProcessingEffect().addComponent(new DepthComponent()).addComponent(
-			new BlurComponent());
+		PostProcessingEffect effect = new PostProcessingEffect().addComponent(new DepthComponent())
+			.addComponent(new BlurComponent()).addComponent(new DownSampleComponent());
 		ppSystem.addEffect(effect);
 	}
 

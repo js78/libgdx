@@ -1,13 +1,9 @@
 #version 130
-
-uniform sampler2D uInputTex;
-uniform float u_test;
-
 #define MAX_BLUR_RADIUS 4096
 
-uniform int uBlurRadius = 16;
-uniform float uBlurSigma = 2.0;
-uniform vec2 uBlurDirection = vec2(1.0, 1.0); // (1,0)/(0,1) for x/y pass
+uniform sampler2D u_texture;
+uniform int u_radius = 16;
+uniform vec2 u_direction = vec2(1.0, 1.0); // (1,0)/(0,1) for x/y pass
 
 varying vec2 v_uv;
 
@@ -19,12 +15,12 @@ vec4 incrementalGauss1D(
 	vec2 direction
 ) {
 
-	int nSamples = clamp(radius, 1, int(MAX_BLUR_RADIUS)) / 2;
+	int nSamples = clamp(u_radius, 1, int(MAX_BLUR_RADIUS)) / 2;
 	
 	if (nSamples == 0)
 		return texture2D(srcTex, origin);
 	
-	float SIGMA = float(uBlurRadius) / 8.0;
+	float SIGMA = float(u_radius) / 8.0;
 	float sig2 = SIGMA * SIGMA;
 	const float TWO_PI	= 6.2831853071795;
 	const float E			= 2.7182818284590;
@@ -51,6 +47,6 @@ vec4 incrementalGauss1D(
 
 
 void main() {
-	vec2 texelSize = 1.0 / vec2(textureSize(uInputTex, 0));
-	gl_FragColor = incrementalGauss1D(uInputTex, texelSize, v_uv, uBlurRadius, uBlurDirection); 
+	vec2 texelSize = 1.0 / vec2(textureSize(u_texture, 0));
+	gl_FragColor = incrementalGauss1D(u_texture, texelSize, v_uv, u_radius, u_direction); 
 }

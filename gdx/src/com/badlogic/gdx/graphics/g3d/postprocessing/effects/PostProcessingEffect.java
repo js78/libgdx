@@ -40,4 +40,11 @@ public class PostProcessingEffect {
 	public Array<PostProcessingComponent> getComponents () {
 		return components;
 	}
+
+	public boolean needsMainTexture () {
+		for (PostProcessingComponent component : components) {
+			if (component.needsMainTexture()) return true;
+		}
+		return false;
+	}
 }

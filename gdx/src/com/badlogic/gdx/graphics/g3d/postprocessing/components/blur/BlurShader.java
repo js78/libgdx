@@ -1,81 +1,39 @@
 
 package com.badlogic.gdx.graphics.g3d.postprocessing.components.blur;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Mesh;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.VertexAttribute;
-import com.badlogic.gdx.graphics.VertexAttributes.Usage;
-import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.Shader;
-import com.badlogic.gdx.graphics.g3d.utils.DefaultTextureBinder;
-import com.badlogic.gdx.graphics.g3d.utils.RenderContext;
-import com.badlogic.gdx.graphics.glutils.ShaderProgram;
-import com.badlogic.gdx.utils.GdxRuntimeException;
+import com.badlogic.gdx.graphics.g3d.postprocessing.components.utils.QuadShader;
+import com.badlogic.gdx.math.Vector2;
 
-public class BlurShader implements Shader {
-	protected Mesh mesh;
-	protected ShaderProgram program;
+public class BlurShader extends QuadShader {
+	/** Uniforms */
+	protected int u_radius;
+	protected int u_direction;
 
-	protected int u_input;
-
-	protected RenderContext context;
+	/** Parameters */
+	protected int radius;
+	protected Vector2 direction = new Vector2();
 
 	public BlurShader () {
-		mesh = new Mesh(true, 4, 0, new VertexAttribute(Usage.Position, 2, ShaderProgram.POSITION_ATTRIBUTE));
-		mesh.setVertices(new float[] {-1, -1, 1, -1, -1, 1, 1, 1});
-		program = new ShaderProgram(Gdx.files.classpath(
-			"com/badlogic/gdx/graphics/g3d/postprocessing/components/blur/blur.vertex.glsl").readString(), Gdx.files.classpath(
-				"com/badlogic/gdx/graphics/g3d/postprocessing/components/blur/blur.fragment.glsl").readString());
-		if (!program.isCompiled()) throw new GdxRuntimeException(program.getLog());
+		this(16, 1, 1);
+	}
 
-		u_input = program.fetchUniformLocation("uInputTex", true);
-		context = new RenderContext(new DefaultTextureBinder(DefaultTextureBinder.ROUNDROBIN));
+	public BlurShader (int radius, float directionX, float directionY) {
+		super();
+		u_radius = program.fetchUniformLocation("u_radius", true);
+		u_direction = program.fetchUniformLocation("u_direction", true);
+		this.radius = radius;
+		this.direction.set(directionX, directionY);
 	}
 
 	@Override
-	public void dispose () {
-		mesh.dispose();
-		program.dispose();
+	protected String getFragment () {
+		return "com/badlogic/gdx/graphics/g3d/postprocessing/components/blur/blur.fragment.glsl";
 	}
 
 	@Override
-	public void init () {
-
-	}
-
-	@Override
-	public int compareTo (Shader other) {
-		return 0;
-	}
-
-	@Override
-	public boolean canRender (Renderable instance) {
-		return true;
-	}
-
-	@Override
-	public void begin (Camera camera, RenderContext context) {
-	}
-
-	@Override
-	public void render (Renderable renderable) {
-	}
-
-	public void render (Texture texture) {
-		context.begin();
-		program.begin();
-		program.setUniformi(u_input, context.textureBinder.bind(texture));
-
-		mesh.render(program, GL20.GL_TRIANGLE_STRIP, 0, mesh.getNumVertices(), true);
-		program.end();
-		context.end();
-	}
-
-	@Override
-	public void end () {
+	protected void setUniforms () {
+		program.setUniformi(u_radius, radius);
+		program.setUniformf(u_direction, direction);
 	}
 
 }
