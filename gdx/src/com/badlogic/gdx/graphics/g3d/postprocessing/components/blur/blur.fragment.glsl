@@ -2,8 +2,8 @@
 #define MAX_BLUR_RADIUS 4096
 
 uniform sampler2D u_texture;
-uniform int u_radius = 16;
-uniform vec2 u_direction = vec2(1.0, 1.0); // (1,0)/(0,1) for x/y pass
+uniform int u_radius;
+uniform vec2 u_direction; // (1,0)/(0,1) for x/y pass
 
 varying vec2 v_uv;
 
@@ -43,8 +43,6 @@ vec4 incrementalGauss1D(
 	
 	return result;
 }
-
-
 
 void main() {
 	vec2 texelSize = 1.0 / vec2(textureSize(u_texture, 0));

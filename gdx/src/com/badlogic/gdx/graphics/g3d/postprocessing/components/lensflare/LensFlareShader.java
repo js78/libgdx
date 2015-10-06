@@ -54,4 +54,20 @@ public class LensFlareShader extends QuadShader {
 		program.setUniformf(u_haloWidth, haloWidth);
 		program.setUniformf(u_distortion, distortion);
 	}
+
+	public void setSamples (int samples) {
+		this.samples = samples;
+	}
+
+	public void setDispersal (float dispersal) {
+		this.dispersal = dispersal;
+	}
+
+	public void setHaloWidth (float haloWidth) {
+		this.haloWidth = haloWidth;
+	}
+
+	public void setDistortion (float distortion) {
+		this.distortion = distortion;
+	}
 }

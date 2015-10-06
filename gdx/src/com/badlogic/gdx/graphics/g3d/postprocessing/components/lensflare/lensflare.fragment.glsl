@@ -13,10 +13,10 @@ const int MAX_SAMPLES = 64;
 
 /*----------------------------------------------------------------------------*/
 vec4 textureDistorted(
-	in sampler2D tex, 
-	in vec2 texcoord, 
-	in vec2 direction,
-	in vec3 distortion 
+	sampler2D tex, 
+	vec2 texcoord, 
+	vec2 direction,
+	vec3 distortion 
 ) {
 	return vec4(
 		texture2D(tex, texcoord + direction * distortion.r).r,
@@ -52,11 +52,7 @@ void main() {
 		) * weight;
 	}
 	
-	result *= texture2D(u_lensColor,
-						vec2(
-							(length(vec2(0.5) - texcoord) / length(vec2(0.5))),
-							0.0)
-						);
+	result *= texture2D(u_lensColor, vec2((length(vec2(0.5) - texcoord) / length(vec2(0.5))), 0.0) );
 
 //	sample halo:
 	float weight = length(vec2(0.5) - fract(texcoord + haloVec)) / length(vec2(0.5));

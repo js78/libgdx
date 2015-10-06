@@ -9,10 +9,10 @@ import com.badlogic.gdx.graphics.g3d.postprocessing.PostProcessingSystem;
 import com.badlogic.gdx.graphics.g3d.postprocessing.components.PostProcessingComponent;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 
-public abstract class QuadComponent implements PostProcessingComponent {
+public abstract class QuadComponent<T extends QuadShader> implements PostProcessingComponent {
 	protected PostProcessingSystem system;
 	protected FrameBuffer frameBuffer;
-	protected QuadShader shader;
+	protected T shader;
 
 	public QuadComponent () {
 		frameBuffer = getFrameBuffer();
@@ -24,7 +24,7 @@ public abstract class QuadComponent implements PostProcessingComponent {
 		return new FrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
 	}
 
-	abstract protected QuadShader getShader ();
+	abstract protected T getShader ();
 
 	@Override
 	public Texture render (Texture input, boolean window) {
