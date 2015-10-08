@@ -20,11 +20,14 @@ public class PostProcessingEffect {
 	public Texture render (Texture input, boolean window) {
 		boolean window2 = false;
 		Texture output = null;
+		int width = input.getWidth(), height = input.getHeight();
 		for (PostProcessingComponent component : components) {
 			if (component == components.get(components.size - 1) && window) {
 				window2 = true;
 			}
-			output = component.render(input, window2);
+			output = component.render(input, window2, width, height);
+			width = component.getWidth();
+			height = component.getHeight();
 			input = output;
 		}
 		return output;

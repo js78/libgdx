@@ -34,4 +34,12 @@ public class DownSampleShader extends QuadShader {
 		program.setUniformf(u_scale, scale, scale, scale, scale);
 		program.setUniformf(u_bias, bias, bias, bias, bias);
 	}
+
+	public void setScale (float scale) {
+		this.scale = scale;
+	}
+
+	public void setBias (float bias) {
+		this.bias = bias;
+	}
 }

@@ -35,6 +35,7 @@ import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.environment.SpotLight;
 import com.badlogic.gdx.graphics.g3d.postprocessing.PostProcessingSystem;
 import com.badlogic.gdx.graphics.g3d.postprocessing.components.blur.BlurComponent;
+import com.badlogic.gdx.graphics.g3d.postprocessing.components.downsample.DownSampleComponent;
 import com.badlogic.gdx.graphics.g3d.postprocessing.components.lensflare.LensFlareComponent;
 import com.badlogic.gdx.graphics.g3d.postprocessing.components.lensflare_composer.LensFlareComposerComponent;
 import com.badlogic.gdx.graphics.g3d.postprocessing.effects.PostProcessingEffect;
@@ -86,6 +87,7 @@ public class PostProcessingTest extends GdxTest {
 
 	LensFlareComponent lensFlareComponent;
 	BlurComponent blurComponent;
+	DownSampleComponent downSampleComponent;
 
 	Stage stage;
 	Label dispersalLabel;
@@ -93,6 +95,8 @@ public class PostProcessingTest extends GdxTest {
 	Label haloWidthLabel;
 	Label distortionLabel;
 	Label blurLabel;
+	Label biasLabel;
+	Label scaleLabel;
 
 	@Override
 	public void create () {
@@ -166,11 +170,17 @@ public class PostProcessingTest extends GdxTest {
 		createAxes();
 
 		ppSystem = new PostProcessingSystem();
-		PostProcessingEffect effect = new PostProcessingEffect().addComponent(lensFlareComponent = new LensFlareComponent())
-			.addComponent(blurComponent = new BlurComponent()).addComponent(new LensFlareComposerComponent());
-		blurComponent.setRadius(0);
 
-		// PostProcessingEffect effect = new PostProcessingEffect().addComponent(new LensFlareComponent());
+		downSampleComponent = new DownSampleComponent().setScale(0).setBias(0);
+		lensFlareComponent = new LensFlareComponent();
+		blurComponent = new BlurComponent().setRadius(0);
+
+		PostProcessingEffect effect = new PostProcessingEffect();
+		effect.addComponent(downSampleComponent);
+		effect.addComponent(lensFlareComponent);
+		effect.addComponent(blurComponent);
+		effect.addComponent(new LensFlareComposerComponent());
+
 		ppSystem.addEffect(effect);
 
 		initStage();
@@ -236,6 +246,24 @@ public class PostProcessingTest extends GdxTest {
 		table.add(blurLabel);
 		table.row();
 
+		Slider bias = new Slider(-1, 1, 0.1f, false, skin);
+		biasLabel = new Label("0", skin);
+		table.add(new Label("Bias", skin));
+		table.row();
+		table.add(bias);
+		table.row();
+		table.add(biasLabel);
+		table.row();
+
+		Slider scale = new Slider(0, 10, 0.25f, false, skin);
+		scaleLabel = new Label("0", skin);
+		table.add(new Label("Scale", skin));
+		table.row();
+		table.add(scale);
+		table.row();
+		table.add(scaleLabel);
+		table.row();
+
 		// Event
 		dispersal.addListener(new ChangeListener() {
 			@Override
@@ -284,6 +312,26 @@ public class PostProcessingTest extends GdxTest {
 				val = Math.round(val * 100) / (float)100;
 				blurComponent.setRadius((int)val);
 				blurLabel.setText(Float.toString(val));
+			}
+		});
+
+		bias.addListener(new ChangeListener() {
+			@Override
+			public void changed (ChangeEvent event, Actor actor) {
+				float val = ((Slider)actor).getValue();
+				val = Math.round(val * 100) / (float)100;
+				downSampleComponent.setBias(val);
+				biasLabel.setText(Float.toString(val));
+			}
+		});
+
+		scale.addListener(new ChangeListener() {
+			@Override
+			public void changed (ChangeEvent event, Actor actor) {
+				float val = ((Slider)actor).getValue();
+				val = Math.round(val * 100) / (float)100;
+				downSampleComponent.setScale(val);
+				scaleLabel.setText(Float.toString(val));
 			}
 		});
 	}

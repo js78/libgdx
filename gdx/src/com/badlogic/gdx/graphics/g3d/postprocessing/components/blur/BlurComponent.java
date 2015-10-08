@@ -9,11 +9,13 @@ public class BlurComponent extends QuadComponent<BlurShader> {
 		return new BlurShader();
 	}
 
-	public void setRadius (int radius) {
+	public BlurComponent setRadius (int radius) {
 		this.shader.setRadius(radius);
+		return this;
 	}
 
-	public void setDirection (float x, float y) {
+	public BlurComponent setDirection (float x, float y) {
 		this.shader.setDirection(x, y);
+		return this;
 	}
 }
