@@ -46,6 +46,7 @@ import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Slider;
@@ -88,6 +89,7 @@ public class PostProcessingTest extends GdxTest {
 	LensFlareComponent lensFlareComponent;
 	BlurComponent blurComponent;
 	DownSampleComponent downSampleComponent;
+	LensFlareComposerComponent lensFlareComposerComponent;
 
 	Stage stage;
 	Label dispersalLabel;
@@ -97,6 +99,16 @@ public class PostProcessingTest extends GdxTest {
 	Label blurLabel;
 	Label biasLabel;
 	Label scaleLabel;
+
+	Slider scale;
+	Slider bias;
+	Slider blurRadius;
+	Slider dispersal;
+	Slider samples;
+	Slider haloWidth;
+	Slider distortion;
+
+	CheckBox flareOnly;
 
 	@Override
 	public void create () {
@@ -171,19 +183,21 @@ public class PostProcessingTest extends GdxTest {
 
 		ppSystem = new PostProcessingSystem();
 
-		downSampleComponent = new DownSampleComponent().setScale(0).setBias(0);
-		lensFlareComponent = new LensFlareComponent();
-		blurComponent = new BlurComponent().setRadius(0);
+		initStage();
+
+		downSampleComponent = new DownSampleComponent().setScale(scale.getValue()).setBias(bias.getValue());
+		lensFlareComponent = new LensFlareComponent().setSamples((int)samples.getValue()).setDispersal(dispersal.getValue())
+			.setHaloWidth(haloWidth.getValue()).setDistortion(distortion.getValue());
+		blurComponent = new BlurComponent().setRadius((int)blurRadius.getValue());
+		lensFlareComposerComponent = new LensFlareComposerComponent().setFlareOnly(flareOnly.isChecked());
 
 		PostProcessingEffect effect = new PostProcessingEffect();
 		effect.addComponent(downSampleComponent);
 		effect.addComponent(lensFlareComponent);
 		effect.addComponent(blurComponent);
-		effect.addComponent(new LensFlareComposerComponent());
+		effect.addComponent(lensFlareComposerComponent);
 
 		ppSystem.addEffect(effect);
-
-		initStage();
 
 		inputController = new CameraInputController(cam);
 		Gdx.input.setInputProcessor(new InputMultiplexer(stage, inputController));
@@ -201,68 +215,79 @@ public class PostProcessingTest extends GdxTest {
 		table.right();
 
 		// Sliders
-		Slider dispersal = new Slider(0, 1, 0.01f, false, skin);
-		dispersalLabel = new Label("0", skin);
+		float initDispersal = 0.37f;
+		dispersal = new Slider(0, 1, 0.01f, false, skin);
+		dispersal.setValue(initDispersal);
+		dispersalLabel = new Label(String.valueOf(initDispersal), skin);
 		table.add(new Label("Dispersal", skin));
 		table.row();
 		table.add(dispersal);
-		table.row();
 		table.add(dispersalLabel);
 		table.row();
 
-		Slider samples = new Slider(0, 16, 1, false, skin);
-		samplesLabel = new Label("0", skin);
+		float initSamples = 8;
+		samples = new Slider(0, 16, 1, false, skin);
+		samples.setValue(initSamples);
+		samplesLabel = new Label(String.valueOf(initSamples), skin);
 		table.add(new Label("Samples", skin));
 		table.row();
 		table.add(samples);
-		table.row();
 		table.add(samplesLabel);
 		table.row();
 
-		Slider haloWidth = new Slider(0, 5, 0.1f, false, skin);
-		haloWidthLabel = new Label("0", skin);
+		float initHaloWidth = 2.5f;
+		haloWidth = new Slider(0, 5, 0.1f, false, skin);
+		haloWidth.setValue(initHaloWidth);
+		haloWidthLabel = new Label(String.valueOf(initHaloWidth), skin);
 		table.add(new Label("Halo width", skin));
 		table.row();
 		table.add(haloWidth);
-		table.row();
 		table.add(haloWidthLabel);
 		table.row();
 
-		Slider distortion = new Slider(0, 20, 0.05f, false, skin);
-		distortionLabel = new Label("0", skin);
+		float initDistortion = 11.75f;
+		distortion = new Slider(0, 20, 0.05f, false, skin);
+		distortion.setValue(initDistortion);
+		distortionLabel = new Label(String.valueOf(initDistortion), skin);
 		table.add(new Label("Distortion", skin));
 		table.row();
 		table.add(distortion);
-		table.row();
 		table.add(distortionLabel);
 		table.row();
 
-		Slider blurRadius = new Slider(0, 20, 1f, false, skin);
-		blurLabel = new Label("0", skin);
+		float initBlurRadius = 10;
+		blurRadius = new Slider(0, 20, 1f, false, skin);
+		blurRadius.setValue(initBlurRadius);
+		blurLabel = new Label(String.valueOf(initBlurRadius), skin);
 		table.add(new Label("Blur radius", skin));
 		table.row();
 		table.add(blurRadius);
-		table.row();
 		table.add(blurLabel);
 		table.row();
 
-		Slider bias = new Slider(-1, 1, 0.1f, false, skin);
-		biasLabel = new Label("0", skin);
+		float initBias = -0.7f;
+		bias = new Slider(-1, 1, 0.1f, false, skin);
+		bias.setValue(initBias);
+		biasLabel = new Label(String.valueOf(initBias), skin);
 		table.add(new Label("Bias", skin));
 		table.row();
 		table.add(bias);
-		table.row();
 		table.add(biasLabel);
 		table.row();
 
-		Slider scale = new Slider(0, 10, 0.25f, false, skin);
-		scaleLabel = new Label("0", skin);
+		float initScale = 10f;
+		scale = new Slider(0, 10, 0.25f, false, skin);
+		scale.setValue(initScale);
+		scaleLabel = new Label(String.valueOf(initScale), skin);
 		table.add(new Label("Scale", skin));
 		table.row();
 		table.add(scale);
-		table.row();
 		table.add(scaleLabel);
 		table.row();
+
+		// Flare only
+		flareOnly = new CheckBox("Flare only", skin);
+		table.add(flareOnly);
 
 		// Event
 		dispersal.addListener(new ChangeListener() {
@@ -332,6 +357,14 @@ public class PostProcessingTest extends GdxTest {
 				val = Math.round(val * 100) / (float)100;
 				downSampleComponent.setScale(val);
 				scaleLabel.setText(Float.toString(val));
+			}
+		});
+
+		flareOnly.addListener(new ChangeListener() {
+			@Override
+			public void changed (ChangeEvent event, Actor actor) {
+				boolean val = ((CheckBox)actor).isChecked();
+				lensFlareComposerComponent.setFlareOnly(val);
 			}
 		});
 	}

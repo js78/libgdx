@@ -14,11 +14,13 @@ public class LensFlareComposerShader extends QuadShader {
 	protected int u_lensDirtTexture;
 	protected int u_lensStarTexture;
 	protected int u_lensStarMatrix;
+	protected int u_flareOnly;
 
 	/** Parameters */
 	protected Texture mainTexture;
 	protected Texture lensDirtTexture;
 	protected Texture lensStarTexture;
+	protected int flareOnly = 0;
 
 	protected Vector3 camX = new Vector3();
 	protected Vector3 camZ = new Vector3();
@@ -35,11 +37,19 @@ public class LensFlareComposerShader extends QuadShader {
 		u_lensDirtTexture = program.fetchUniformLocation("u_lensDirtTexture", true);
 		u_lensStarTexture = program.fetchUniformLocation("u_lensStarTexture", true);
 		u_lensStarMatrix = program.fetchUniformLocation("u_lensStarMatrix", true);
+		u_flareOnly = program.fetchUniformLocation("u_flareOnly", true);
 
 		this.lensDirtTexture = new Texture(
 			Gdx.files.classpath("com/badlogic/gdx/graphics/g3d/postprocessing/components/lensflare_composer/lensdirt.png"));
 		this.lensStarTexture = new Texture(
 			Gdx.files.classpath("com/badlogic/gdx/graphics/g3d/postprocessing/components/lensflare_composer/lensstar.png"));
+	}
+
+	public void setFlareOnly (boolean flareOnly) {
+		if (flareOnly)
+			this.flareOnly = 1;
+		else
+			this.flareOnly = 0;
 	}
 
 	@Override
@@ -73,5 +83,6 @@ public class LensFlareComposerShader extends QuadShader {
 		program.setUniformi(u_lensDirtTexture, context.textureBinder.bind(lensDirtTexture));
 		program.setUniformi(u_lensStarTexture, context.textureBinder.bind(lensStarTexture));
 		program.setUniformMatrix(u_lensStarMatrix, resultMatrix);
+		program.setUniformi(u_flareOnly, flareOnly);
 	}
 }
