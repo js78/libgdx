@@ -57,17 +57,21 @@ public class LensFlareShader extends QuadShader {
 
 	public void setSamples (int samples) {
 		this.samples = samples;
+		dirty = true;
 	}
 
 	public void setDispersal (float dispersal) {
 		this.dispersal = dispersal;
+		dirty = true;
 	}
 
 	public void setHaloWidth (float haloWidth) {
 		this.haloWidth = haloWidth;
+		dirty = true;
 	}
 
 	public void setDistortion (float distortion) {
 		this.distortion = distortion;
+		dirty = true;
 	}
 }

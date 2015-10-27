@@ -14,21 +14,21 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.badlogic.gdx.graphics.g3d.postprocessing.components.depth;
+package com.badlogic.gdx.graphics.g3d.postprocessing.components.normaldepth;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 
-public class DepthShader extends DefaultShader {
+public class NormalDepthShader extends DefaultShader {
 
 	private static String defaultVertexShader = null;
 
 	public final static String getDefaultVertexShader () {
 		if (defaultVertexShader == null)
 			defaultVertexShader = Gdx.files.classpath(
-				"com/badlogic/gdx/graphics/g3d/postprocessing/components/depth/depth.vertex.glsl").readString();
+				"com/badlogic/gdx/graphics/g3d/postprocessing/components/depth/normaldepth.vertex.glsl").readString();
 		return defaultVertexShader;
 	}
 
@@ -37,7 +37,7 @@ public class DepthShader extends DefaultShader {
 	public final static String getDefaultFragmentShader () {
 		if (defaultFragmentShader == null)
 			defaultFragmentShader = Gdx.files.classpath(
-				"com/badlogic/gdx/graphics/g3d/postprocessing/components/depth/depth.fragment.glsl").readString();
+				"com/badlogic/gdx/graphics/g3d/postprocessing/components/depth/normaldepth.fragment.glsl").readString();
 		return defaultFragmentShader;
 	}
 
@@ -46,25 +46,25 @@ public class DepthShader extends DefaultShader {
 		return prefix;
 	}
 
-	public DepthShader (final Renderable renderable) {
+	public NormalDepthShader (final Renderable renderable) {
 		this(renderable, new Config());
 	}
 
-	public DepthShader (final Renderable renderable, final Config config) {
+	public NormalDepthShader (final Renderable renderable, final Config config) {
 		this(renderable, config, createPrefix(renderable, config));
 	}
 
-	public DepthShader (final Renderable renderable, final Config config, final String prefix) {
+	public NormalDepthShader (final Renderable renderable, final Config config, final String prefix) {
 		this(renderable, config, prefix, config.vertexShader != null ? config.vertexShader : getDefaultVertexShader(),
 			config.fragmentShader != null ? config.fragmentShader : getDefaultFragmentShader());
 	}
 
-	public DepthShader (final Renderable renderable, final Config config, final String prefix, final String vertexShader,
+	public NormalDepthShader (final Renderable renderable, final Config config, final String prefix, final String vertexShader,
 		final String fragmentShader) {
 		this(renderable, config, new ShaderProgram(prefix + vertexShader, prefix + fragmentShader));
 	}
 
-	public DepthShader (final Renderable renderable, final Config config, final ShaderProgram shaderProgram) {
+	public NormalDepthShader (final Renderable renderable, final Config config, final ShaderProgram shaderProgram) {
 		super(renderable, config, shaderProgram);
 	}
 }

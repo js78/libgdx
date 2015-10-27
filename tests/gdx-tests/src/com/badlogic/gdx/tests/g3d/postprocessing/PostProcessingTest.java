@@ -99,8 +99,10 @@ public class PostProcessingTest extends GdxTest {
 	Label blurLabel;
 	Label biasLabel;
 	Label scaleLabel;
+	Label frameBufferScaleLabel;
 
 	Slider scale;
+	Slider frameBufferScale;
 	Slider bias;
 	Slider blurRadius;
 	Slider dispersal;
@@ -185,7 +187,8 @@ public class PostProcessingTest extends GdxTest {
 
 		initStage();
 
-		downSampleComponent = new DownSampleComponent().setScale(scale.getValue()).setBias(bias.getValue());
+		downSampleComponent = new DownSampleComponent(frameBufferScale.getValue()).setScale(scale.getValue()).setBias(
+			bias.getValue());
 		lensFlareComponent = new LensFlareComponent().setSamples((int)samples.getValue()).setDispersal(dispersal.getValue())
 			.setHaloWidth(haloWidth.getValue()).setDistortion(distortion.getValue());
 		blurComponent = new BlurComponent().setRadius((int)blurRadius.getValue());
@@ -285,6 +288,16 @@ public class PostProcessingTest extends GdxTest {
 		table.add(scaleLabel);
 		table.row();
 
+		float initFrameBufferScale = 1f;
+		frameBufferScale = new Slider(0.25f, 1, 0.25f, false, skin);
+		frameBufferScale.setValue(initFrameBufferScale);
+		frameBufferScaleLabel = new Label(String.valueOf(initFrameBufferScale), skin);
+		table.add(new Label("FrameBuffer Scale", skin));
+		table.row();
+		table.add(frameBufferScale);
+		table.add(frameBufferScaleLabel);
+		table.row();
+
 		// Flare only
 		flareOnly = new CheckBox("Flare only", skin);
 		table.add(flareOnly);
@@ -357,6 +370,16 @@ public class PostProcessingTest extends GdxTest {
 				val = Math.round(val * 100) / (float)100;
 				downSampleComponent.setScale(val);
 				scaleLabel.setText(Float.toString(val));
+			}
+		});
+
+		frameBufferScale.addListener(new ChangeListener() {
+			@Override
+			public void changed (ChangeEvent event, Actor actor) {
+				float val = ((Slider)actor).getValue();
+				val = Math.round(val * 100) / (float)100;
+				downSampleComponent.setFrameBufferScale(val);
+				frameBufferScaleLabel.setText(Float.toString(val));
 			}
 		});
 

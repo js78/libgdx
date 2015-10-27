@@ -14,34 +14,34 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.badlogic.gdx.graphics.g3d.postprocessing.components.depth;
+package com.badlogic.gdx.graphics.g3d.postprocessing.components.normaldepth;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.graphics.g3d.utils.BaseShaderProvider;
 
-public class DepthShaderProvider extends BaseShaderProvider {
-	public final DepthShader.Config config;
+public class NormalDepthShaderProvider extends BaseShaderProvider {
+	public final NormalDepthShader.Config config;
 
-	public DepthShaderProvider (final DepthShader.Config config) {
-		this.config = (config == null) ? new DepthShader.Config() : config;
+	public NormalDepthShaderProvider (final NormalDepthShader.Config config) {
+		this.config = (config == null) ? new NormalDepthShader.Config() : config;
 	}
 
-	public DepthShaderProvider (final String vertexShader, final String fragmentShader) {
-		this(new DepthShader.Config(vertexShader, fragmentShader));
+	public NormalDepthShaderProvider (final String vertexShader, final String fragmentShader) {
+		this(new NormalDepthShader.Config(vertexShader, fragmentShader));
 	}
 
-	public DepthShaderProvider (final FileHandle vertexShader, final FileHandle fragmentShader) {
+	public NormalDepthShaderProvider (final FileHandle vertexShader, final FileHandle fragmentShader) {
 		this(vertexShader.readString(), fragmentShader.readString());
 	}
 
-	public DepthShaderProvider () {
+	public NormalDepthShaderProvider () {
 		this(null);
 	}
 
 	@Override
 	protected Shader createShader (final Renderable renderable) {
-		return new DepthShader(renderable, config);
+		return new NormalDepthShader(renderable, config);
 	}
 }

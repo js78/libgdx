@@ -38,9 +38,11 @@ public class BlurShader extends QuadShader {
 
 	public void setRadius (int radius) {
 		this.radius = radius;
+		dirty = true;
 	}
 
 	public void setDirection (float x, float y) {
 		this.direction.set(x, y);
+		dirty = true;
 	}
 }

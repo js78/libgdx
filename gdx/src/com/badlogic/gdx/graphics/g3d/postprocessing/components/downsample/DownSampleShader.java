@@ -37,9 +37,11 @@ public class DownSampleShader extends QuadShader {
 
 	public void setScale (float scale) {
 		this.scale = scale;
+		dirty = true;
 	}
 
 	public void setBias (float bias) {
 		this.bias = bias;
+		dirty = true;
 	}
 }

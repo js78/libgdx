@@ -85,4 +85,9 @@ public class LensFlareComposerShader extends QuadShader {
 		program.setUniformMatrix(u_lensStarMatrix, resultMatrix);
 		program.setUniformi(u_flareOnly, flareOnly);
 	}
+
+	@Override
+	protected boolean alwaysDirty () {
+		return true;
+	}
 }

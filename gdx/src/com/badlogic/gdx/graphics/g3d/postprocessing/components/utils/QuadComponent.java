@@ -25,13 +25,17 @@ public abstract class QuadComponent<T extends QuadShader> implements PostProcess
 
 	abstract protected T getShader ();
 
+	protected void checkFrameBuffer (int width, int height) {
+		if (frameBuffer != null && (frameBuffer.getWidth() != width || frameBuffer.getHeight() != height)) {
+			frameBuffer.dispose();
+			frameBuffer = null;
+		}
+	}
+
 	@Override
 	public Texture render (Texture input, boolean window, int width, int height) {
 		if (!window) {
-			if (frameBuffer != null && (frameBuffer.getWidth() != width || frameBuffer.getHeight() != height)) {
-				frameBuffer.dispose();
-				frameBuffer = null;
-			}
+			checkFrameBuffer(width, height);
 
 			if (frameBuffer == null) {
 				frameBuffer = getFrameBuffer(width, height);
@@ -40,12 +44,12 @@ public abstract class QuadComponent<T extends QuadShader> implements PostProcess
 			frameBuffer.begin();
 		}
 
-		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		shader.render(input);
 
 		if (!window) {
+			// ScreenshotFactory.saveScreenshot(frameBuffer.getWidth(), frameBuffer.getHeight(), "toto", true);
 			frameBuffer.end();
 			return frameBuffer.getColorBufferTexture();
 		}

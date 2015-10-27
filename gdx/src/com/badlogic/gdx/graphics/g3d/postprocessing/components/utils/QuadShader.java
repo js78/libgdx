@@ -19,6 +19,7 @@ public class QuadShader implements Disposable {
 	protected RenderContext context;
 	protected int u_texture;
 	protected QuadComponent component;
+	protected boolean dirty = true;
 
 	public QuadShader () {
 		mesh = new Mesh(true, 4, 0, new VertexAttribute(Usage.Position, 2, ShaderProgram.POSITION_ATTRIBUTE));
@@ -55,9 +56,16 @@ public class QuadShader implements Disposable {
 		context.begin();
 		program.begin();
 		program.setUniformi(u_texture, context.textureBinder.bind(texture));
-		setUniforms();
+		if (dirty || alwaysDirty()) {
+			setUniforms();
+			dirty = false;
+		}
 		mesh.render(program, GL20.GL_TRIANGLE_STRIP, 0, mesh.getNumVertices(), true);
 		program.end();
 		context.end();
+	}
+
+	protected boolean alwaysDirty () {
+		return false;
 	}
 }
