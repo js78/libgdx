@@ -66,6 +66,7 @@ public abstract class QuadComponent<T extends QuadShader> implements PostProcess
 		return system;
 	}
 
+	/** @TODO Maybe useless */
 	@Override
 	public boolean needsMainTexture () {
 		return false;

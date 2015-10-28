@@ -55,6 +55,11 @@ public class LensFlareShader extends QuadShader {
 		program.setUniformf(u_distortion, distortion);
 	}
 
+	@Override
+	protected boolean alwaysDirty () {
+		return true;
+	}
+
 	public void setSamples (int samples) {
 		this.samples = samples;
 		dirty = true;

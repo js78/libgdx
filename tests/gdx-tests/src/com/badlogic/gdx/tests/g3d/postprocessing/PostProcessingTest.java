@@ -35,10 +35,7 @@ import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.environment.SpotLight;
 import com.badlogic.gdx.graphics.g3d.postprocessing.PostProcessingSystem;
 import com.badlogic.gdx.graphics.g3d.postprocessing.components.blur.BlurComponent;
-import com.badlogic.gdx.graphics.g3d.postprocessing.components.downsample.DownSampleComponent;
-import com.badlogic.gdx.graphics.g3d.postprocessing.components.lensflare.LensFlareComponent;
-import com.badlogic.gdx.graphics.g3d.postprocessing.components.lensflare_composer.LensFlareComposerComponent;
-import com.badlogic.gdx.graphics.g3d.postprocessing.effects.PostProcessingEffect;
+import com.badlogic.gdx.graphics.g3d.postprocessing.effects.LensFlareEffect;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
@@ -86,10 +83,7 @@ public class PostProcessingTest extends GdxTest {
 	protected ModelInstance cubeInstance;
 	protected PerspectiveCamera camCube;
 
-	LensFlareComponent lensFlareComponent;
-	BlurComponent blurComponent;
-	DownSampleComponent downSampleComponent;
-	LensFlareComposerComponent lensFlareComposerComponent;
+	LensFlareEffect lensFlareEffect;
 
 	Stage stage;
 	Label dispersalLabel;
@@ -187,20 +181,11 @@ public class PostProcessingTest extends GdxTest {
 
 		initStage();
 
-		downSampleComponent = new DownSampleComponent(frameBufferScale.getValue()).setScale(scale.getValue()).setBias(
-			bias.getValue());
-		lensFlareComponent = new LensFlareComponent().setSamples((int)samples.getValue()).setDispersal(dispersal.getValue())
-			.setHaloWidth(haloWidth.getValue()).setDistortion(distortion.getValue());
-		blurComponent = new BlurComponent().setRadius((int)blurRadius.getValue());
-		lensFlareComposerComponent = new LensFlareComposerComponent().setFlareOnly(flareOnly.isChecked());
+		lensFlareEffect = new LensFlareEffect(frameBufferScale.getValue(), scale.getValue(), bias.getValue(),
+			(int)samples.getValue(), dispersal.getValue(), haloWidth.getValue(), distortion.getValue(), (int)blurRadius.getValue(),
+			flareOnly.isChecked());
 
-		PostProcessingEffect effect = new PostProcessingEffect();
-		effect.addComponent(downSampleComponent);
-		effect.addComponent(lensFlareComponent);
-		effect.addComponent(blurComponent);
-		effect.addComponent(lensFlareComposerComponent);
-
-		ppSystem.addEffect(effect);
+		ppSystem.addEffect(lensFlareEffect);
 
 		inputController = new CameraInputController(cam);
 		Gdx.input.setInputProcessor(new InputMultiplexer(stage, inputController));
@@ -308,7 +293,7 @@ public class PostProcessingTest extends GdxTest {
 			public void changed (ChangeEvent event, Actor actor) {
 				float val = ((Slider)actor).getValue();
 				val = Math.round(val * 100) / (float)100;
-				lensFlareComponent.setDispersal(val);
+				lensFlareEffect.setDispersal(val);
 				dispersalLabel.setText(Float.toString(val));
 			}
 		});
@@ -318,7 +303,7 @@ public class PostProcessingTest extends GdxTest {
 			public void changed (ChangeEvent event, Actor actor) {
 				float val = ((Slider)actor).getValue();
 				val = Math.round(val * 100) / (float)100;
-				lensFlareComponent.setSamples((int)val);
+				lensFlareEffect.setSamples((int)val);
 				samplesLabel.setText(Float.toString(val));
 			}
 		});
@@ -328,7 +313,7 @@ public class PostProcessingTest extends GdxTest {
 			public void changed (ChangeEvent event, Actor actor) {
 				float val = ((Slider)actor).getValue();
 				val = Math.round(val * 100) / (float)100;
-				lensFlareComponent.setHaloWidth(val);
+				lensFlareEffect.setHaloWidth(val);
 				haloWidthLabel.setText(Float.toString(val));
 			}
 		});
@@ -338,7 +323,7 @@ public class PostProcessingTest extends GdxTest {
 			public void changed (ChangeEvent event, Actor actor) {
 				float val = ((Slider)actor).getValue();
 				val = Math.round(val * 100) / (float)100;
-				lensFlareComponent.setDistortion(val);
+				lensFlareEffect.setDistortion(val);
 				distortionLabel.setText(Float.toString(val));
 			}
 		});
@@ -348,7 +333,7 @@ public class PostProcessingTest extends GdxTest {
 			public void changed (ChangeEvent event, Actor actor) {
 				float val = ((Slider)actor).getValue();
 				val = Math.round(val * 100) / (float)100;
-				blurComponent.setRadius((int)val);
+				lensFlareEffect.setRadius((int)val);
 				blurLabel.setText(Float.toString(val));
 			}
 		});
@@ -358,7 +343,7 @@ public class PostProcessingTest extends GdxTest {
 			public void changed (ChangeEvent event, Actor actor) {
 				float val = ((Slider)actor).getValue();
 				val = Math.round(val * 100) / (float)100;
-				downSampleComponent.setBias(val);
+				lensFlareEffect.setBias(val);
 				biasLabel.setText(Float.toString(val));
 			}
 		});
@@ -368,7 +353,7 @@ public class PostProcessingTest extends GdxTest {
 			public void changed (ChangeEvent event, Actor actor) {
 				float val = ((Slider)actor).getValue();
 				val = Math.round(val * 100) / (float)100;
-				downSampleComponent.setScale(val);
+				lensFlareEffect.setScale(val);
 				scaleLabel.setText(Float.toString(val));
 			}
 		});
@@ -378,7 +363,7 @@ public class PostProcessingTest extends GdxTest {
 			public void changed (ChangeEvent event, Actor actor) {
 				float val = ((Slider)actor).getValue();
 				val = Math.round(val * 100) / (float)100;
-				downSampleComponent.setFrameBufferScale(val);
+				lensFlareEffect.setFrameBufferScale(val);
 				frameBufferScaleLabel.setText(Float.toString(val));
 			}
 		});
@@ -387,7 +372,7 @@ public class PostProcessingTest extends GdxTest {
 			@Override
 			public void changed (ChangeEvent event, Actor actor) {
 				boolean val = ((CheckBox)actor).isChecked();
-				lensFlareComposerComponent.setFlareOnly(val);
+				lensFlareEffect.setFlareOnly(val);
 			}
 		});
 	}

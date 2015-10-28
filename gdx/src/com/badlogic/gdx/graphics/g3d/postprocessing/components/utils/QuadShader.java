@@ -60,11 +60,15 @@ public class QuadShader implements Disposable {
 			setUniforms();
 			dirty = false;
 		}
+		// setUniforms();
+
 		mesh.render(program, GL20.GL_TRIANGLE_STRIP, 0, mesh.getNumVertices(), true);
 		program.end();
 		context.end();
 	}
 
+	/** Override and return true if your uniforms should always be binded. If you bind a texture, you have to return true.
+	 * @return boolean */
 	protected boolean alwaysDirty () {
 		return false;
 	}

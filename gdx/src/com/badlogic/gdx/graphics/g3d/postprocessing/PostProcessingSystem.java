@@ -23,6 +23,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.postprocessing.components.utils.QuadShader;
+import com.badlogic.gdx.graphics.g3d.postprocessing.effects.BasePostProcessingEffect;
 import com.badlogic.gdx.graphics.g3d.postprocessing.effects.PostProcessingEffect;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.utils.Array;
@@ -61,7 +62,7 @@ public class PostProcessingSystem {
 		return mainTexture;
 	}
 
-	public PostProcessingSystem addEffect (PostProcessingEffect effect) {
+	public PostProcessingSystem addEffect (BasePostProcessingEffect effect) {
 		effects.add(effect);
 		effect.init(this);
 		return this;

@@ -17,7 +17,6 @@ public class LensFlareComposerShader extends QuadShader {
 	protected int u_flareOnly;
 
 	/** Parameters */
-	protected Texture mainTexture;
 	protected Texture lensDirtTexture;
 	protected Texture lensStarTexture;
 	protected int flareOnly = 0;

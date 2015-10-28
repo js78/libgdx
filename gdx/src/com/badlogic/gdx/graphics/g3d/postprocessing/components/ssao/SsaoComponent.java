@@ -10,23 +10,23 @@ public class SsaoComponent extends QuadComponent<SsaoShader> {
 		return new SsaoShader();
 	}
 
-	public SsaoComponent setSamples (int samples) {
-		this.shader.setSamples(samples);
+	public SsaoComponent setKernelSize (int kernelSize) {
+		shader.setKernelSize(kernelSize);
 		return this;
 	}
 
-	public SsaoComponent setDispersal (float dispersal) {
-		this.shader.setDispersal(dispersal);
+	public SsaoComponent setRadius (float radius) {
+		shader.setRadius(radius);
 		return this;
 	}
 
-	public SsaoComponent setHaloWidth (float haloWidth) {
-		this.shader.setHaloWidth(haloWidth);
+	public SsaoComponent setPower (float power) {
+		shader.setPower(power);
 		return this;
 	}
 
-	public SsaoComponent setDistortion (float distortion) {
-		this.shader.setDistortion(distortion);
+	public SsaoComponent setNoiseSize (int size) {
+		shader.setNoiseSize(size);
 		return this;
 	}
 }
