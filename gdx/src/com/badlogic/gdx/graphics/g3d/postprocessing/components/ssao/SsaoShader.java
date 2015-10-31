@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.postprocessing.components.utils.QuadShader;
+import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
@@ -46,7 +47,7 @@ public class SsaoShader extends QuadShader {
 		super();
 
 		// @TODO FORCE
-		boolean force = false;
+		boolean force = true;
 		u_tanHalfFov = program.fetchUniformLocation("u_tanHalfFov", force);
 		u_aspectRatio = program.fetchUniformLocation("u_aspectRatio", force);
 		u_noiseTexture = program.fetchUniformLocation("u_noiseTexture", force);
@@ -127,7 +128,7 @@ public class SsaoShader extends QuadShader {
 		for (int i = 0; i < kernelSize; i++) {
 			Vector3 v = new Vector3(MathUtils.random(-1, 1), MathUtils.random(-1, 1), MathUtils.random(0, 1)).nor();
 			float scale = (float)i / (float)kernelSize;
-			// v.scl(Interpolation.linear.apply(0.1f, 1, scale * scale));
+			v.scl(Interpolation.linear.apply(0.1f, 1, scale * scale));
 
 			kernelOffsets.add(v);
 		}
