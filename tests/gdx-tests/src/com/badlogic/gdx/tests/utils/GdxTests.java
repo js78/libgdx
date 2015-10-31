@@ -65,7 +65,8 @@ import com.badlogic.gdx.tests.g3d.ShaderTest;
 import com.badlogic.gdx.tests.g3d.ShadowMappingTest;
 import com.badlogic.gdx.tests.g3d.SkeletonTest;
 import com.badlogic.gdx.tests.g3d.TextureRegion3DTest;
-import com.badlogic.gdx.tests.g3d.postprocessing.PostProcessingTest;
+import com.badlogic.gdx.tests.g3d.postprocessing.PPLensFlareTest;
+import com.badlogic.gdx.tests.g3d.postprocessing.PPSsaoTest;
 import com.badlogic.gdx.tests.gles2.HelloTriangle;
 import com.badlogic.gdx.tests.gles2.SimpleVertexShader;
 import com.badlogic.gdx.tests.net.NetAPITest;
@@ -74,7 +75,7 @@ import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.StreamUtils;
 
 /** List of GdxTest classes. To be used by the test launchers. If you write your own test, add it in here!
- *
+ * 
  * @author badlogicgames@gmail.com */
 public class GdxTests {
 	public static final List<Class<? extends GdxTest>> tests = new ArrayList<Class<? extends GdxTest>>(Arrays.asList(
@@ -254,7 +255,8 @@ public class GdxTests {
 		InternationalFontsTest.class,
 		PngTest.class,
 		JsonTest.class,
-		PostProcessingTest.class
+		PPLensFlareTest.class,
+		PPSsaoTest.class
 		// @on
 
 		// SoundTouchTest.class, Mpg123Test.class, WavTest.class, FreeTypeTest.class,

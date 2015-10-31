@@ -28,7 +28,7 @@ public class NormalDepthShader extends DefaultShader {
 	public final static String getDefaultVertexShader () {
 		if (defaultVertexShader == null)
 			defaultVertexShader = Gdx.files.classpath(
-				"com/badlogic/gdx/graphics/g3d/postprocessing/components/depth/normaldepth.vertex.glsl").readString();
+				"com/badlogic/gdx/graphics/g3d/postprocessing/components/normaldepth/normaldepth.vertex.glsl").readString();
 		return defaultVertexShader;
 	}
 
@@ -37,7 +37,7 @@ public class NormalDepthShader extends DefaultShader {
 	public final static String getDefaultFragmentShader () {
 		if (defaultFragmentShader == null)
 			defaultFragmentShader = Gdx.files.classpath(
-				"com/badlogic/gdx/graphics/g3d/postprocessing/components/depth/normaldepth.fragment.glsl").readString();
+				"com/badlogic/gdx/graphics/g3d/postprocessing/components/normaldepth/normaldepth.fragment.glsl").readString();
 		return defaultFragmentShader;
 	}
 

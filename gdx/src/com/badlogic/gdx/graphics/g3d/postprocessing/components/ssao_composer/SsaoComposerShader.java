@@ -39,4 +39,10 @@ public class SsaoComposerShader extends QuadShader {
 		this.blurSize = blurSize;
 		dirty = true;
 	}
+
+	@Override
+	protected boolean alwaysDirty () {
+		return true;
+	}
+
 }

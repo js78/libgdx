@@ -13,4 +13,9 @@ public class SsaoComposerComponent extends QuadComponent<SsaoComposerShader> {
 		this.shader.setBlurSize(blurSize);
 		return this;
 	}
+
+	@Override
+	public boolean needsMainTexture () {
+		return true;
+	}
 }

@@ -1,3 +1,5 @@
+#version 130
+
 uniform sampler2D u_texture;
 uniform sampler2D u_mainTexture;
 uniform int u_blurSize;
@@ -22,5 +24,5 @@ float getOcclusionBlurred() {
 }
 
 void main() {
-	gl_FragColor = texture2D(u_texture, v_uv) * getOcclusionBlurred();
+	gl_FragColor = texture2D(u_mainTexture, v_uv) * getOcclusionBlurred();
 }

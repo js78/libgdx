@@ -11,7 +11,7 @@ uniform vec3 u_kernelOffsets[MAX_KERNEL_SIZE];
 uniform float u_radius;
 uniform float u_power;
 
-varying noperspective vec3 v_viewRay; // required
+varying vec3 v_viewRay; // required
 varying vec2 v_uv;
 
 float linearizeDepth(float depth, mat4 projMatrix) {
@@ -21,6 +21,7 @@ float linearizeDepth(float depth, mat4 projMatrix) {
 float ssao(mat3 kernelBasis, vec3 originPos, float radius) {
 	float occlusion = 0.0;
 	for (int i = 0; i < u_kernelSize; ++i) {
+		gl_FragColor = vec4(1.0);
 		// get sample position:
 		vec3 samplePos = kernelBasis * u_kernelOffsets[i];
 		samplePos = samplePos * radius + originPos;
@@ -50,17 +51,21 @@ void main() {
 	
 	// get view space origin:
 	float originDepth = texture2D(u_texture, v_uv).a;
+	
 	originDepth = linearizeDepth(originDepth, u_projectionMatrix);
 	vec3 originPos = v_viewRay * originDepth;
 
 	// get view space normal:
 	vec3 normal = texture2D(u_texture, v_uv).rgb * 2.0 - 1.0;
-		
+	
+	
 	// construct kernel basis matrix:
 	vec3 rvec = texture2D(u_noiseTexture, noiseTexCoords).rgb * 2.0 - 1.0;
 	vec3 tangent = normalize(rvec - normal * dot(rvec, normal));
 	vec3 bitangent = cross(tangent, normal);
 	mat3 kernelBasis = mat3(tangent, bitangent, normal);
 	
-	gl_FragColor = vec4(ssao(kernelBasis, originPos, u_radius));
+	gl_FragColor = vec4(u_kernelOffsets[0][0], 0.0, 0.0, 1.0);
+	
+	//gl_FragColor = vec4(ssao(kernelBasis, originPos, u_radius));
 }

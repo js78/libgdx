@@ -35,7 +35,7 @@ import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.environment.SpotLight;
 import com.badlogic.gdx.graphics.g3d.postprocessing.PostProcessingSystem;
 import com.badlogic.gdx.graphics.g3d.postprocessing.components.blur.BlurComponent;
-import com.badlogic.gdx.graphics.g3d.postprocessing.effects.LensFlareEffect;
+import com.badlogic.gdx.graphics.g3d.postprocessing.effects.SsaoEffect;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
@@ -43,7 +43,6 @@ import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Slider;
@@ -53,9 +52,9 @@ import com.badlogic.gdx.tests.utils.GdxTest;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
-public class PostProcessingTest extends GdxTest {
+public class PPSsaoTest extends GdxTest {
 	PerspectiveCamera cam;
-	CameraInputController inputController;
+	FirstPersonEvolvedCameraController inputController;
 
 	Model model;
 	ModelInstance instance;
@@ -83,28 +82,20 @@ public class PostProcessingTest extends GdxTest {
 	protected ModelInstance cubeInstance;
 	protected PerspectiveCamera camCube;
 
-	LensFlareEffect lensFlareEffect;
+	SsaoEffect ssaoEffect;
 
 	Stage stage;
-	Label dispersalLabel;
-	Label samplesLabel;
-	Label haloWidthLabel;
-	Label distortionLabel;
-	Label blurLabel;
-	Label biasLabel;
-	Label scaleLabel;
-	Label frameBufferScaleLabel;
+	Label kernelSizeLabel;
+	Label radiusLabel;
+	Label powerLabel;
+	Label noiseSizeLabel;
+	Label blurSizeLabel;
 
-	Slider scale;
-	Slider frameBufferScale;
-	Slider bias;
-	Slider blurRadius;
-	Slider dispersal;
-	Slider samples;
-	Slider haloWidth;
-	Slider distortion;
-
-	CheckBox flareOnly;
+	Slider kernelSize;
+	Slider radiusSlider;
+	Slider power;
+	Slider noiseSize;
+	Slider blurSize;
 
 	@Override
 	public void create () {
@@ -181,14 +172,14 @@ public class PostProcessingTest extends GdxTest {
 
 		initStage();
 
-		lensFlareEffect = new LensFlareEffect(frameBufferScale.getValue(), scale.getValue(), bias.getValue(),
-			(int)samples.getValue(), dispersal.getValue(), haloWidth.getValue(), distortion.getValue(), (int)blurRadius.getValue(),
-			flareOnly.isChecked());
+		ssaoEffect = new SsaoEffect().setBlurSize((int)blurSize.getValue()).setKernelSize((int)kernelSize.getValue())
+			.setNoiseSize((int)noiseSize.getValue()).setPower(power.getValue()).setRadius(radiusSlider.getValue());
 
-		ppSystem.addEffect(lensFlareEffect);
+		ppSystem.addEffect(ssaoEffect);
 
-		inputController = new CameraInputController(cam);
-		Gdx.input.setInputProcessor(new InputMultiplexer(stage, inputController));
+		inputController = new FirstPersonEvolvedCameraController(cam);
+		CameraInputController i2 = new CameraInputController(cam);
+		Gdx.input.setInputProcessor(new InputMultiplexer(stage, i2));
 	}
 
 	private void initStage () {
@@ -203,176 +194,104 @@ public class PostProcessingTest extends GdxTest {
 		table.right();
 
 		// Sliders
-		float initDispersal = 0.37f;
-		dispersal = new Slider(0, 1, 0.01f, false, skin);
-		dispersal.setValue(initDispersal);
-		dispersalLabel = new Label(String.valueOf(initDispersal), skin);
-		table.add(new Label("Dispersal", skin));
+		float initBlurSize = 4;
+		blurSize = new Slider(0, 10, 1f, false, skin);
+		blurSize.setValue(initBlurSize);
+		blurSizeLabel = new Label(String.valueOf(initBlurSize), skin);
+		table.add(new Label("Blur size", skin));
 		table.row();
-		table.add(dispersal);
-		table.add(dispersalLabel);
-		table.row();
-
-		float initSamples = 8;
-		samples = new Slider(0, 16, 1, false, skin);
-		samples.setValue(initSamples);
-		samplesLabel = new Label(String.valueOf(initSamples), skin);
-		table.add(new Label("Samples", skin));
-		table.row();
-		table.add(samples);
-		table.add(samplesLabel);
+		table.add(blurSize);
+		table.add(blurSizeLabel);
 		table.row();
 
-		float initHaloWidth = 2.5f;
-		haloWidth = new Slider(0, 5, 0.1f, false, skin);
-		haloWidth.setValue(initHaloWidth);
-		haloWidthLabel = new Label(String.valueOf(initHaloWidth), skin);
-		table.add(new Label("Halo width", skin));
+		float initNoiseSize = 4;
+		noiseSize = new Slider(0, 20, 1f, false, skin);
+		noiseSize.setValue(initNoiseSize);
+		noiseSizeLabel = new Label(String.valueOf(initNoiseSize), skin);
+		table.add(new Label("Noise size", skin));
 		table.row();
-		table.add(haloWidth);
-		table.add(haloWidthLabel);
-		table.row();
-
-		float initDistortion = 11.75f;
-		distortion = new Slider(0, 20, 0.05f, false, skin);
-		distortion.setValue(initDistortion);
-		distortionLabel = new Label(String.valueOf(initDistortion), skin);
-		table.add(new Label("Distortion", skin));
-		table.row();
-		table.add(distortion);
-		table.add(distortionLabel);
+		table.add(noiseSize);
+		table.add(noiseSizeLabel);
 		table.row();
 
-		float initBlurRadius = 10;
-		blurRadius = new Slider(0, 20, 1f, false, skin);
-		blurRadius.setValue(initBlurRadius);
-		blurLabel = new Label(String.valueOf(initBlurRadius), skin);
-		table.add(new Label("Blur radius", skin));
+		float initKernelSize = 4;
+		kernelSize = new Slider(1, 10, 1, false, skin);
+		kernelSize.setValue(initKernelSize);
+		kernelSizeLabel = new Label(String.valueOf(initKernelSize), skin);
+		table.add(new Label("Kernel Size", skin));
 		table.row();
-		table.add(blurRadius);
-		table.add(blurLabel);
-		table.row();
-
-		float initBias = -0.7f;
-		bias = new Slider(-1, 1, 0.1f, false, skin);
-		bias.setValue(initBias);
-		biasLabel = new Label(String.valueOf(initBias), skin);
-		table.add(new Label("Bias", skin));
-		table.row();
-		table.add(bias);
-		table.add(biasLabel);
+		table.add(kernelSize);
+		table.add(kernelSizeLabel);
 		table.row();
 
-		float initScale = 10f;
-		scale = new Slider(0, 10, 0.25f, false, skin);
-		scale.setValue(initScale);
-		scaleLabel = new Label(String.valueOf(initScale), skin);
-		table.add(new Label("Scale", skin));
+		float initRadius = 1.5f;
+		radiusSlider = new Slider(0, 5, 0.5f, false, skin);
+		radiusSlider.setValue(initRadius);
+		radiusLabel = new Label(String.valueOf(initRadius), skin);
+		table.add(new Label("Radius", skin));
 		table.row();
-		table.add(scale);
-		table.add(scaleLabel);
-		table.row();
-
-		float initFrameBufferScale = 1f;
-		frameBufferScale = new Slider(0.25f, 1, 0.25f, false, skin);
-		frameBufferScale.setValue(initFrameBufferScale);
-		frameBufferScaleLabel = new Label(String.valueOf(initFrameBufferScale), skin);
-		table.add(new Label("FrameBuffer Scale", skin));
-		table.row();
-		table.add(frameBufferScale);
-		table.add(frameBufferScaleLabel);
+		table.add(radiusSlider);
+		table.add(radiusLabel);
 		table.row();
 
-		// Flare only
-		flareOnly = new CheckBox("Flare only", skin);
-		table.add(flareOnly);
+		float initPower = 2f;
+		power = new Slider(0, 6, 1f, false, skin);
+		power.setValue(initPower);
+		powerLabel = new Label(String.valueOf(initPower), skin);
+		table.add(new Label("Power", skin));
+		table.row();
+		table.add(power);
+		table.add(powerLabel);
+		table.row();
 
 		// Event
-		dispersal.addListener(new ChangeListener() {
+		blurSize.addListener(new ChangeListener() {
 			@Override
 			public void changed (ChangeEvent event, Actor actor) {
 				float val = ((Slider)actor).getValue();
 				val = Math.round(val * 100) / (float)100;
-				lensFlareEffect.setDispersal(val);
-				dispersalLabel.setText(Float.toString(val));
+				ssaoEffect.setBlurSize((int)val);
+				blurSizeLabel.setText(Float.toString(val));
 			}
 		});
 
-		samples.addListener(new ChangeListener() {
+		noiseSize.addListener(new ChangeListener() {
 			@Override
 			public void changed (ChangeEvent event, Actor actor) {
 				float val = ((Slider)actor).getValue();
 				val = Math.round(val * 100) / (float)100;
-				lensFlareEffect.setSamples((int)val);
-				samplesLabel.setText(Float.toString(val));
+				ssaoEffect.setNoiseSize((int)val);
+				noiseSizeLabel.setText(Float.toString(val));
 			}
 		});
 
-		haloWidth.addListener(new ChangeListener() {
+		power.addListener(new ChangeListener() {
 			@Override
 			public void changed (ChangeEvent event, Actor actor) {
 				float val = ((Slider)actor).getValue();
 				val = Math.round(val * 100) / (float)100;
-				lensFlareEffect.setHaloWidth(val);
-				haloWidthLabel.setText(Float.toString(val));
+				ssaoEffect.setPower(val);
+				powerLabel.setText(Float.toString(val));
 			}
 		});
 
-		distortion.addListener(new ChangeListener() {
+		kernelSize.addListener(new ChangeListener() {
 			@Override
 			public void changed (ChangeEvent event, Actor actor) {
 				float val = ((Slider)actor).getValue();
 				val = Math.round(val * 100) / (float)100;
-				lensFlareEffect.setDistortion(val);
-				distortionLabel.setText(Float.toString(val));
+				ssaoEffect.setKernelSize((int)val);
+				kernelSizeLabel.setText(Float.toString(val));
 			}
 		});
 
-		blurRadius.addListener(new ChangeListener() {
+		radiusSlider.addListener(new ChangeListener() {
 			@Override
 			public void changed (ChangeEvent event, Actor actor) {
 				float val = ((Slider)actor).getValue();
 				val = Math.round(val * 100) / (float)100;
-				lensFlareEffect.setRadius((int)val);
-				blurLabel.setText(Float.toString(val));
-			}
-		});
-
-		bias.addListener(new ChangeListener() {
-			@Override
-			public void changed (ChangeEvent event, Actor actor) {
-				float val = ((Slider)actor).getValue();
-				val = Math.round(val * 100) / (float)100;
-				lensFlareEffect.setBias(val);
-				biasLabel.setText(Float.toString(val));
-			}
-		});
-
-		scale.addListener(new ChangeListener() {
-			@Override
-			public void changed (ChangeEvent event, Actor actor) {
-				float val = ((Slider)actor).getValue();
-				val = Math.round(val * 100) / (float)100;
-				lensFlareEffect.setScale(val);
-				scaleLabel.setText(Float.toString(val));
-			}
-		});
-
-		frameBufferScale.addListener(new ChangeListener() {
-			@Override
-			public void changed (ChangeEvent event, Actor actor) {
-				float val = ((Slider)actor).getValue();
-				val = Math.round(val * 100) / (float)100;
-				lensFlareEffect.setFrameBufferScale(val);
-				frameBufferScaleLabel.setText(Float.toString(val));
-			}
-		});
-
-		flareOnly.addListener(new ChangeListener() {
-			@Override
-			public void changed (ChangeEvent event, Actor actor) {
-				boolean val = ((CheckBox)actor).isChecked();
-				lensFlareEffect.setFlareOnly(val);
+				ssaoEffect.setRadius(val);
+				radiusLabel.setText(Float.toString(val));
 			}
 		});
 	}
@@ -404,34 +323,32 @@ public class PostProcessingTest extends GdxTest {
 	@Override
 	public void render () {
 		final float delta = Gdx.graphics.getDeltaTime();
-		sl.position.rotate(Vector3.Y, -delta * 20f);
-		sl.position.rotate(Vector3.X, -delta * 30f);
-		sl.position.rotate(Vector3.Z, -delta * 10f);
-		sl.direction.set(Vector3.Zero.cpy().sub(sl.position));
+		inputController.update(delta);
 
-		sl2.position.rotate(Vector3.Y, delta * 10f);
-		sl2.position.rotate(Vector3.X, delta * 20f);
-		sl2.position.rotate(Vector3.Z, delta * 30f);
-		sl2.direction.set(Vector3.Zero.cpy().sub(sl2.position));
-
-		sl3.position.rotate(Vector3.Y, delta * 30f);
-		sl3.position.rotate(Vector3.X, delta * 10f);
-		sl3.position.rotate(Vector3.Z, delta * 20f);
-		sl3.direction.set(Vector3.Zero.cpy().sub(sl3.position));
-
-		dl.direction.rotate(Vector3.X, delta * 10f);
+		/*
+		 * sl.position.rotate(Vector3.Y, -delta * 20f); sl.position.rotate(Vector3.X, -delta * 30f); sl.position.rotate(Vector3.Z,
+		 * -delta * 10f); sl.direction.set(Vector3.Zero.cpy().sub(sl.position));
+		 * 
+		 * sl2.position.rotate(Vector3.Y, delta * 10f); sl2.position.rotate(Vector3.X, delta * 20f); sl2.position.rotate(Vector3.Z,
+		 * delta * 30f); sl2.direction.set(Vector3.Zero.cpy().sub(sl2.position));
+		 * 
+		 * sl3.position.rotate(Vector3.Y, delta * 30f); sl3.position.rotate(Vector3.X, delta * 10f); sl3.position.rotate(Vector3.Z,
+		 * delta * 20f); sl3.direction.set(Vector3.Zero.cpy().sub(sl3.position));
+		 * 
+		 * dl.direction.rotate(Vector3.X, delta * 10f);
+		 */
 
 		ppSystem.begin();
 		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-		cubeBatch.begin(cam);
-		cubeBatch.render(cubeInstance);
-		cubeBatch.end();
-		// modelBatch.begin(cam);
-		// modelBatch.render(axesInstance);
-		// modelBatch.render(instance, environment);
-		// modelBatch.end();
+		// cubeBatch.begin(cam);
+		// cubeBatch.render(cubeInstance);
+		// cubeBatch.end();
+		modelBatch.begin(cam);
+		modelBatch.render(axesInstance);
+		modelBatch.render(instances, environment);
+		modelBatch.end();
 		ppSystem.end();
 
 		ppSystem.render(cam, instances, environment);
