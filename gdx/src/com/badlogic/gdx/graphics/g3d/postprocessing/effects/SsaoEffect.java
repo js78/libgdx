@@ -27,7 +27,7 @@ public class SsaoEffect extends BasePostProcessingEffect {
 
 		addComponent(normalDepthComponent);
 		addComponent(ssaoComponent);
-		addComponent(ssaoComposerComponent);
+		// addComponent(ssaoComposerComponent);
 	}
 
 	public SsaoEffect setKernelSize (int kernelSize) {

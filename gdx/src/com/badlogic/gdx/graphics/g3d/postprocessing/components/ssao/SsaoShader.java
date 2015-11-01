@@ -20,6 +20,8 @@ public class SsaoShader extends QuadShader {
 	protected int u_kernelSize;
 	protected int u_radius;
 	protected int u_power;
+	protected int u_zNear;
+	protected int u_zFar;
 
 	protected int u_kernelOffsets0;
 	protected int u_kernelOffsets1;
@@ -47,7 +49,7 @@ public class SsaoShader extends QuadShader {
 		super();
 
 		// @TODO FORCE
-		boolean force = true;
+		boolean force = false;
 		u_tanHalfFov = program.fetchUniformLocation("u_tanHalfFov", force);
 		u_aspectRatio = program.fetchUniformLocation("u_aspectRatio", force);
 		u_noiseTexture = program.fetchUniformLocation("u_noiseTexture", force);
@@ -55,6 +57,8 @@ public class SsaoShader extends QuadShader {
 		u_kernelSize = program.fetchUniformLocation("u_kernelSize", force);
 		u_radius = program.fetchUniformLocation("u_radius", force);
 		u_power = program.fetchUniformLocation("u_power", force);
+		u_zNear = program.fetchUniformLocation("u_zNear", force);
+		u_zFar = program.fetchUniformLocation("u_zFar", force);
 
 		u_kernelOffsets0 = program.fetchUniformLocation("u_kernelOffsets[0]", force);
 		u_kernelOffsets1 = program.fetchUniformLocation("u_kernelOffsets[1]", force);
@@ -77,13 +81,19 @@ public class SsaoShader extends QuadShader {
 		return "com/badlogic/gdx/graphics/g3d/postprocessing/components/ssao/ssao.fragment.glsl";
 	}
 
-	@Override
-	protected void setUniforms () {
+	protected void setTextures (Texture texture) {
+		super.setTextures(texture);
+
 		if (dirtyNoise || noiseTexture == null) {
 			generateNoiseTexture();
 			dirtyNoise = false;
 		}
 
+		program.setUniformi(u_noiseTexture, context.textureBinder.bind(noiseTexture));
+	}
+
+	@Override
+	protected void setUniforms () {
 		if (dirtyKernelSize || kernelOffsets == null) {
 			generateKernelOffsets();
 			dirtyKernelSize = false;
@@ -93,11 +103,12 @@ public class SsaoShader extends QuadShader {
 
 		program.setUniformf(u_tanHalfFov, (float)Math.tan(camera.fieldOfView / 2f));
 		program.setUniformf(u_aspectRatio, camera.viewportWidth / camera.viewportHeight);
-		program.setUniformi(u_noiseTexture, context.textureBinder.bind(noiseTexture));
 		program.setUniformMatrix(u_projectionMatrix, camera.projection);
 		program.setUniformi(u_kernelSize, kernelSize);
 		program.setUniformf(u_radius, radius);
 		program.setUniformf(u_power, power);
+		program.setUniformf(u_zNear, camera.near);
+		program.setUniformf(u_zFar, camera.far);
 
 		for (int i = 0; i < kernelSize; i++) {
 			int idx = kernelOffsetsLoc + i * kernelOffsetsSize;
